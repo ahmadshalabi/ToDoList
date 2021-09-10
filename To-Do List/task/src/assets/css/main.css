@@ -58,7 +58,7 @@ ul {
 #add-task-button,
 .delete-btn,
 #input-task,
-.checkbox {
+.task-checkbox {
     font-size: 1em;
 }
 
@@ -75,7 +75,7 @@ ul {
     background-color: #2b2d42;
 }
 
-.checkbox {
+.task-checkbox {
     height: 1em;
     width: 1em;
 }
@@ -95,4 +95,8 @@ ul {
 
 .delete-btn:after {
     content: "x";
+}
+
+.completed {
+    text-decoration: line-through;
 }
