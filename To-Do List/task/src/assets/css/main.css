@@ -1,0 +1,96 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.25rem;
+}
+
+h1 {
+    text-align: center;
+}
+
+ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+.to-do-list-container,
+.task-container,
+.input-task-container {
+    display: flex;
+}
+
+.to-do-list-container,
+.task-container {
+    align-items: center;
+}
+
+.to-do-list-container {
+    flex-direction: column;
+}
+
+.to-do-list-item {
+    width: 30%;
+}
+
+#input-task,
+.task {
+    flex-grow: 1;
+}
+
+#input-task {
+    margin-right: 2em;
+}
+
+.task-container {
+    height: 2.5em;
+}
+
+.task {
+    margin-left: 1em;
+}
+
+#add-task-button {
+    background-color: #8d99ae;
+    padding: 0.5em;
+}
+
+#add-task-button,
+.delete-btn,
+#input-task,
+.checkbox {
+    font-size: 1em;
+}
+
+#add-task-button,
+.delete-btn {
+    border: none;
+    color: #edf2f4;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#add-task-button:hover,
+.delete-btn:hover {
+    background-color: #2b2d42;
+}
+
+.checkbox {
+    height: 1em;
+    width: 1em;
+}
+
+.delete-btn {
+    background-color: #d90429;
+
+    /* Make a circle */
+    width: 1.75em;
+    height: 1.75em;
+    border-radius: 50%;
+    box-sizing: border-box;
+
+    /* Center element vertically and it should by as height*/
+    line-height: 1.75em;
+}
+
+.delete-btn:after {
+    content: "x";
+}
