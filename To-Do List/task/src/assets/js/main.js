@@ -6,70 +6,125 @@ let ToDoListApp = (function () {
         this.listener = listener;
     }
 
-    let listeners = {
-        addTask: function () {
+    const Listeners = (function () {
+        function addTask() {
             const taskName = elements.inputTask.element.value;
-            if (taskName === "") {
-                return;
+            if (taskName !== "") {
+
+                const task = {
+                    id: uuidv4(),
+                    name: taskName,
+                    isCompleted: false,
+                }
+
+                renderTask(task);
+
+                TaskListLocalStorage.add(task);
             }
-            const taskList = elements.taskList.element;
-            let taskContainer = elements.taskContainer.element(taskName);
-            taskList.appendChild(taskContainer);
-        },
-        removeParentElement: function (event) {
-            event.target.parentElement.remove();
-        },
-        toggleTask: function (event) {
-            const taskCheckbox = event.target;
-            const taskName = taskCheckbox.nextElementSibling;
-            taskName.classList.toggle("completed");
         }
-    }
 
-    let elements = {
+        function removeParentElement(event) {
+            const taskContainer = event.target.parentElement;
+            taskContainer.remove();
+
+            TaskListLocalStorage.remove(taskContainer.dataset.id);
+        }
+
+        function toggleTask(event) {
+            const taskContainer = event.target.parentElement;
+            const taskName = taskContainer.querySelector(`.${elements.task.identifier}`);
+            taskName.classList.toggle("completed");
+
+            TaskListLocalStorage.toggleIsComplete(taskContainer.dataset.id);
+        }
+
+        return {
+            addTask: addTask,
+            removeParentElement: removeParentElement,
+            toggleTask: toggleTask
+        }
+    })();
+
+    this.elements = {
         inputTask: new Element("input-task"),
-        addTaskButton: new Element("add-task-button", null, listeners.addTask),
+        addTaskButton: new Element("add-task-button", null, Listeners.addTask),
         taskList: new Element("task-list"),
-        deleteButtons: new Element("delete-btn", null, listeners.removeParentElement),
-        taskContainer: new Element("task-container", createTaskContainerElement),
-        taskCheckboxes: new Element("task-checkbox", null, listeners.toggleTask),
-    }
-
-    function createTaskContainerElement(taskName) {
-        const taskContainer = document.createElement("li");
-        taskContainer.className = this.identifier;
-        taskContainer.innerHTML = `<input class="task-checkbox" type="checkbox">
-                                        <span class="task">${taskName}</span>
+        taskContainer: new Element("task-container", function (task) {
+            const taskContainer = document.createElement("li");
+            taskContainer.className = this.identifier;
+            taskContainer.dataset.id = task.id;
+            taskContainer.innerHTML = `<input class="task-checkbox" type="checkbox"">
+                                        <span class="task">${task.name}</span>
                                         <button class="delete-btn"></button>`
 
-        const deleteButton = taskContainer.querySelector(`.${elements.deleteButtons.identifier}`);
-        deleteButton.addEventListener("click", elements.deleteButtons.listener);
+            const deleteButton = taskContainer.querySelector(`.${elements.deleteButton.identifier}`);
+            deleteButton.addEventListener("click", elements.deleteButton.listener);
 
-        const taskCheckBox = taskContainer.querySelector(`.${elements.taskCheckboxes.identifier}`);
-        taskCheckBox.addEventListener("click", listeners.toggleTask)
-        return taskContainer;
+            const taskCheckbox = taskContainer.querySelector(`.${elements.taskCheckbox.identifier}`);
+            taskCheckbox.addEventListener("click", Listeners.toggleTask);
+            return taskContainer;
+        }),
+        task: new Element("task"),
+        taskCheckbox: new Element("task-checkbox", null, Listeners.toggleTask),
+        deleteButton: new Element("delete-btn", null, Listeners.removeParentElement),
     }
+
+    const TaskListLocalStorage = (function () {
+        const STORAGE_KEY = "tasks";
+        const taskList = new Map(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+
+        function add(task) {
+            taskList.set(task.id, task);
+            save();
+        }
+
+        function toggleIsComplete(uuid) {
+            const task = taskList.get(uuid);
+            task.isCompleted = !task.isCompleted;
+            save();
+        }
+
+        function remove(uuid) {
+            taskList.delete(uuid);
+            save();
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(taskList.entries())));
+        }
+
+        function load() {
+            return taskList.values();
+        }
+
+        return {
+            add: add,
+            toggleIsComplete: toggleIsComplete,
+            remove: remove,
+            load: load,
+        }
+    })();
 
     function init() {
         elements.inputTask.element = document.getElementById(elements.inputTask.identifier);
         elements.addTaskButton.element = document.getElementById(elements.addTaskButton.identifier);
         elements.taskList.element = document.getElementById(elements.taskList.identifier);
-        elements.deleteButtons.element = document.getElementsByClassName(elements.deleteButtons.identifier);
-        elements.taskCheckboxes.element = document.getElementsByClassName(elements.taskCheckboxes.identifier);
 
-        elements.addTaskButton.element.addEventListener("click", elements.addTaskButton.listener)
+        elements.addTaskButton.element.addEventListener("click", elements.addTaskButton.listener);
+        loadAndRenderTasks();
+    }
 
-        const deleteButtons = elements.deleteButtons.element;
-        for (let i = 0; i < deleteButtons.length; i++) {
-            let deleteButton = deleteButtons.item(i)
-            deleteButton.addEventListener("click", elements.deleteButtons.listener);
+    function loadAndRenderTasks() {
+        const taskList = TaskListLocalStorage.load();
+        for (const task of taskList) {
+            renderTask(task);
         }
+    }
 
-        const taskCheckboxes = elements.taskCheckboxes.element;
-        for (let i = 0; i < taskCheckboxes.length; i++) {
-            let taskCheckbox = taskCheckboxes.item(i)
-            taskCheckbox.addEventListener("click", elements.taskCheckboxes.listener);
-        }
+    function renderTask(task) {
+        const taskContainer = elements.taskContainer.element(task);
+        const taskList = elements.taskList.element;
+        taskList.appendChild(taskContainer);
     }
 
     return {
