@@ -53,14 +53,16 @@ let ToDoListApp = (function () {
             const taskContainer = document.createElement("li");
             taskContainer.className = this.identifier;
             taskContainer.dataset.id = task.id;
+            const isTaskCompleted = task.isCompleted;
             taskContainer.innerHTML = `<input class="task-checkbox" type="checkbox"">
-                                        <span class="task">${task.name}</span>
+                                        <span class="task ${isTaskCompleted ? "completed" : ""}">${task.name}</span>
                                         <button class="delete-btn"></button>`
 
             const deleteButton = taskContainer.querySelector(`.${elements.deleteButton.identifier}`);
             deleteButton.addEventListener("click", elements.deleteButton.listener);
 
             const taskCheckbox = taskContainer.querySelector(`.${elements.taskCheckbox.identifier}`);
+            taskCheckbox.checked = isTaskCompleted;
             taskCheckbox.addEventListener("click", Listeners.toggleTask);
             return taskContainer;
         }),
